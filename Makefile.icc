@@ -1,0 +1,42 @@
+CC=icc
+CFLAGS=-Wall -Werror -O0
+OTHER_C_FLAGS=-Wall -Ofast -xHost -ipo -Werror
+LIBDIRS=-L/usr/lib64/atlas
+LIBS=-lsatlas
+
+all: tema2_blas tema2_neopt tema2_opt_m
+
+plots: plot_gcc plot_icc plot_blas_gcc_vs_icc plot_neopt_gcc_vs_icc plot_opt_m_gcc_vs_icc plot_opt_f_gcc_vs_icc
+
+plot_gcc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'gcc_blas.out' using 1:2 title 'gcc blas solver' with lines,  'gcc_neopt.out' using 1:2 title 'gcc neopt solver' with lines,'gcc_opt.out' using 1:2 title 'gcc opt solver' with lines, 'gcc_f_opt.out' using 1:2 title 'gcc opt f solver' with lines "
+
+plot_icc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'icc_blas.out' using 1:2 title 'icc blas solver' with lines,  'icc_neopt.out' using 1:2 title 'icc neopt solver' with lines,'icc_opt.out' using 1:2 title 'icc opt m solver' with lines, 'icc_f_opt.out' using 1:2 title 'icc opt f solver' with lines "
+
+plot_blas_gcc_vs_icc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'gcc_blas.out' using 1:2 title 'gcc blas solver' with lines, 'icc_blas.out' using 1:2 title 'icc blas solver' with lines "
+
+plot_neopt_gcc_vs_icc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'gcc_neopt.out' using 1:2 title 'gcc neopt solver' with lines, 'icc_neopt.out' using 1:2 title 'icc neopt solver' with lines "
+
+plot_opt_m_gcc_vs_icc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'gcc_opt.out' using 1:2 title 'gcc opt m solver' with lines, 'icc_opt.out' using 1:2 title 'icc opt m solver' with lines "
+
+plot_opt_f_gcc_vs_icc:
+	gnuplot -persist -e "set xlabel 'Size (N)'; set ylabel 'Performance (sec)'; plot 'gcc_f_opt.out' using 1:2 title 'gcc opt f solver' with lines, 'icc_f_opt.out' using 1:2 title 'icc opt f solver' with lines "
+
+tema2_blas: solver_blas.c main.c
+	$(CC) $(CFLAGS) $^ $(LIBDIRS) $(LIBS) -o $@	
+
+tema2_neopt: solver_neopt.c main.c
+	$(CC) $(CFLAGS) $^ $(LIBDIRS) $(LIBS) -o $@	
+
+tema2_opt_m: solver_opt.c main.c
+	$(CC) $(CFLAGS) $^ $(LIBDIRS) $(LIBS) -o $@	
+
+tema2_opt_f: solver_neopt.c main.c
+	$(CC) $(OTHER_C_FLAGS) $^ $(LIBDIRS) $(LIBS) -o $@
+
+clean:
+	rm -rf tema2_blas tema2_neopt tema2_opt_m tema2_opt_f
